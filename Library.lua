@@ -5535,17 +5535,49 @@ function Library:CreateWindow(...)
         ZIndex = 10; 
         Parent = Outer;
     });
-
-    local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 7, 0, 0);
-        Size = UDim2.new(0, 0, 0, 25);
-        Text = Config.Title or '';
-        TextXAlignment = Enum.TextXAlignment.Left;
-        ZIndex = 1;
-        Parent = Inner;
+        -- This TitleHolder will center our content
+    local TitleHolder = Library:Create('Frame', {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(1, -20, 1, 0), -- Give it some padding
+        BackgroundTransparency = 1,
+        Parent = DraggableHeader,
     });
 
-    local MainSectionOuter = Library:Create('Frame', {
+    local TitleListLayout = Library:Create('UIListLayout', {
+        FillDirection = Enum.FillDirection.Horizontal,
+        HorizontalAlignment = Enum.HorizontalAlignment.Center,
+        VerticalAlignment = Enum.VerticalAlignment.Center,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = UDim.new(0, 6),
+        Parent = TitleHolder,
+    });
+
+    -- LOGO
+    if Config.Icon then
+        local WindowIcon = Library:Create('ImageLabel', {
+            Image = Config.Icon, -- This should be a full rbxassetid:// or URL
+            Size = Config.IconSize or UDim2.fromOffset(20, 20),
+            BackgroundTransparency = 1,
+            Parent = TitleHolder,
+        });
+    end
+
+    -- TITLE
+    local WindowTitle = Library:CreateLabel({
+        Size = UDim2.new(0, 0, 0, 25), -- Automatic width
+        AutomaticSize = Enum.AutomaticSize.X,
+        Text = Config.Title or '',
+        TextXAlignment = Enum.TextXAlignment.Center,
+        TextSize = 18, -- Made it a bit bigger
+        ZIndex = 1,
+        Parent = TitleHolder,
+    });
+
+    -- Make it changeable
+    Window.WindowTitle = WindowTitle
+
+        local MainSectionOuter = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Library.OutlineColor;
         Position = UDim2.new(0, 8, 0, 25);
@@ -5627,6 +5659,59 @@ function Library:CreateWindow(...)
         ZIndex = 2;
         Parent = MainSectionInner;
     });
+
+        -- FOOTER BAR
+    local BottomBar = Library:Create('Frame', {
+        AnchorPoint = Vector2.new(0, 1),
+        Position = UDim2.new(0, 8, 1, -8), -- Anchor to bottom of MainSectionInner
+        Size = UDim2.new(1, -16, 0, 20),
+        BackgroundTransparency = 1,
+        Parent = MainSectionInner, -- Parent it to the same frame as TabContainer
+    });
+
+    -- FOOTER: Left (Clock)
+    local ClockLabel = Library:CreateLabel({
+        AnchorPoint = Vector2.new(0, 0.5),
+        Position = UDim2.new(0, 5, 0.5, 0),
+        Size = UDim2.new(0.3, 0, 1, 0), -- 30% width
+        Text = "00:00:00 AM",
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = BottomBar,
+    });
+
+    -- FOOTER: Middle (Footer Text)
+    local FooterLabel = Library:CreateLabel({
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0.4, 0, 1, 0), -- 40% width
+        Text = Config.Footer or "",
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        Parent = BottomBar,
+    });
+    Window.FooterLabel = FooterLabel -- So it can be changed
+
+    -- FOOTER: Right (User Name)
+    local UserLabel = Library:CreateLabel({
+        AnchorPoint = Vector2.new(1, 0.5),
+        Position = UDim2.new(1, -5, 0.5, 0),
+        Size = UDim2.new(0.3, 0, 1, 0), -- 30% width
+        Text = LocalPlayer.Name,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        Parent = BottomBar,
+    });
+
+    -- Clock Update Loop
+    task.spawn(function()
+        while task.wait(1) do
+            if not Outer.Parent then break end -- Stop if library is destroyed
+            pcall(function()
+                ClockLabel.Text = os.date("%I:%M:%S %p")
+            end)
+        end
+end)
     
     local InnerVideoBackground = Library:Create('VideoFrame', {
         BackgroundColor3 = Library.MainColor;
@@ -5650,7 +5735,7 @@ function Library:CreateWindow(...)
     function Window:SetWindowTitle(Title)
         if typeof(Title) == "string" then
             Window.Title = Title;
-            WindowLabel.Text = Window.Title;
+            Window.WindowTitle.Text = Window.Title;
         end
     end;
 

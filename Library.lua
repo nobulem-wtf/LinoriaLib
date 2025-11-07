@@ -5574,8 +5574,11 @@ function Library:CreateWindow(...)
         Parent = TitleHolder,
     });
 
-    -- Make it changeable
-    Window.WindowTitle = WindowTitle
+        if Library.RegistryMap[WindowTitle] then
+            Library.RegistryMap[WindowTitle].Properties.TextColor3 = nil
+        end
+        
+        Window.WindowTitle = WindowTitle
 
         local MainSectionOuter = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;

@@ -5563,10 +5563,10 @@ function Library:CreateWindow(...)
         });
     end
 
-    -- TITLE
     local WindowTitle = Library:CreateLabel({
         Size = UDim2.new(0, 0, 0, 25), -- Automatic width
         AutomaticSize = Enum.AutomaticSize.X,
+        TextColor3 = Color3.fromRGB(255, 0, 0), -- <-- ADD THIS LINE
         Text = Config.Title or '',
         TextXAlignment = Enum.TextXAlignment.Center,
         TextSize = 18, -- Made it a bit bigger
@@ -5655,7 +5655,7 @@ function Library:CreateWindow(...)
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
         Position = UDim2.new(0, 8, 0, 30);
-        Size = UDim2.new(1, -16, 1, -38);
+        Size = UDim2.new(1, -16, 1, -58);
         ZIndex = 2;
         Parent = MainSectionInner;
     });
